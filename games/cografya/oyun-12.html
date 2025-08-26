@@ -67,6 +67,8 @@
 		}
 		function correct(points = 10) { GameEngine.addScore(points); AudioFx.play('s-correct'); }
 		function wrong() { AudioFx.play('s-wrong'); }
+		// Expose to window for inline onclick handlers inside module scope
+		Object.assign(window, { correct, wrong });
 	</script>
 </body>
 </html>
