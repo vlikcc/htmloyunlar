@@ -28,7 +28,11 @@
 				</div>
 			</header>
 			<section class="board" id="board">
-				<div class="container"><h2>Harita Sembolleri</h2><p>Hızlı soru: Doğru seçeneği işaretle.</p><div class="grid grid-3"><button class="button" onclick="correct()">Doğru</button><button class="button secondary" onclick="wrong()">Yanlış 1</button><button class="button secondary" onclick="wrong()">Yanlış 2</button></div></div>
+				<div class="container" id="quiz">
+					<h2 id="game-title"></h2>
+					<p id="question-text"></p>
+					<div class="grid grid-3" id="answers"></div>
+				</div>
 			</section>
 			<footer class="footer">
 				<span>Coğrafya</span>
@@ -42,13 +46,23 @@
 
 	<script type="module">
 		import { GameEngine, Timer, AudioFx, $, $all } from '/assets/engine.js';
+		import { SUBJECT_QUESTIONS } from '/assets/questions.js';
 		const scoreEl = document.getElementById('score');
 		const timeEl = document.getElementById('time');
+		const questionTextEl = document.getElementById('question-text');
+		const answersEl = document.getElementById('answers');
+		const titleEl = document.getElementById('game-title');
+
+		let subjectKey = (location.pathname.split('/')[2] || '').toLowerCase();
+		let questions = [];
+		let currentIndex = 0;
+
 		GameEngine.init({
 			onStart() { startLevel(); },
 			onReset() { resetLevel(); }
 		});
 		window.addEventListener('score:change', (e) => { scoreEl.textContent = String(e.detail); });
+
 		function startLevel() {
 			GameEngine.resetScore();
 			Timer.start(60, (s) => timeEl.textContent = String(s), () => endLevel());
@@ -63,12 +77,33 @@
 			alert(`Süre bitti! Skor: ${GameEngine.state.score}`);
 		}
 		function setup(isReset = false) {
-			document.getElementById("board").innerHTML = `<div class="container"><h2>Harita Sembolleri</h2><p>Hızlı soru: Doğru seçeneği işaretle.</p><div class="grid grid-3"><button class="button" onclick="correct()">Doğru</button><button class="button secondary" onclick="wrong()">Yanlış 1</button><button class="button secondary" onclick="wrong()">Yanlış 2</button></div></div>`;
+			const all = SUBJECT_QUESTIONS[subjectKey] || [];
+			questions = shuffle(all).slice(0, Math.min(15, all.length));
+			currentIndex = 0;
+			titleEl.textContent = document.title.replace(/ - .+$/, '');
+			renderQuestion();
 		}
+		function renderQuestion() {
+			if (currentIndex >= questions.length) { endLevel(); return; }
+			const q = questions[currentIndex];
+			questionTextEl.textContent = `Soru ${currentIndex + 1}: ${q.text}`;
+			answersEl.innerHTML = '';
+			shuffle(q.choices).forEach((choice, i) => {
+				const btn = document.createElement('button');
+				btn.className = 'button' + (i === 0 ? '' : ' secondary');
+				btn.textContent = choice.text;
+				btn.addEventListener('click', () => selectAnswer(choice.correct));
+				answersEl.appendChild(btn);
+			});
+		}
+		function selectAnswer(isCorrect) {
+			if (isCorrect) { correct(); nextQuestion(); } else { wrong(); }
+		}
+		function nextQuestion() { currentIndex += 1; renderQuestion(); }
 		function correct(points = 10) { GameEngine.addScore(points); AudioFx.play('s-correct'); }
 		function wrong() { AudioFx.play('s-wrong'); }
-		// Expose to window for inline onclick handlers inside module scope
-		Object.assign(window, { correct, wrong });
+		function shuffle(arr) { return arr.slice().sort(() => Math.random() - 0.5); }
+		Object.assign(window, { /* for legacy */ correct, wrong });
 	</script>
 </body>
 </html>

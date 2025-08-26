@@ -25,18 +25,6 @@ subjects = {
 	],
 }
 
-placeholder_question = (
-	'<div class="container">'
-	'<h2>{title}</h2>'
-	'<p>Hızlı soru: Doğru seçeneği işaretle.</p>'
-	'<div class="grid grid-3">'
-	'<button class="button" onclick="correct()">Doğru</button>'
-	'<button class="button secondary" onclick="wrong()">Yanlış 1</button>'
-	'<button class="button secondary" onclick="wrong()">Yanlış 2</button>'
-	'</div>'
-	'</div>'
-)
-
 
 def build_game_html(template: str, subject_key: str, title: str) -> str:
 	subject_label = {
@@ -49,9 +37,6 @@ def build_game_html(template: str, subject_key: str, title: str) -> str:
 	}[subject_key]
 	html = template.replace('{{TITLE}}', f'{title} - {subject_label}')
 	html = html.replace('{{SUBJECT}}', subject_label)
-	q = placeholder_question.format(title=title)
-	html = html.replace('<!-- GAME_CONTENT -->', q)
-	html = html.replace('// GAME_SETUP', f'document.getElementById("board").innerHTML = `{q}`;')
 	return html
 
 
