@@ -9,12 +9,15 @@ export const GameEngine = {
 		document.addEventListener("click", (e) => {
 			const target = e.target;
 			if (!(target instanceof HTMLElement)) return;
-			if (target.matches("[data-action=toggle-audio]")) {
+			const actionEl = target.closest('[data-action]');
+			if (!(actionEl instanceof HTMLElement)) return;
+			const action = actionEl.getAttribute('data-action');
+			if (action === 'toggle-audio') {
 				this.state.muted = !this.state.muted;
 				window.localStorage.setItem("muted", String(this.state.muted));
 			}
-			if (target.matches("[data-action=start]")) this.onStart?.();
-			if (target.matches("[data-action=reset]")) this.onReset?.();
+			if (action === 'start') this.onStart?.();
+			if (action === 'reset') this.onReset?.();
 		});
 	},
 	addScore(points) {
