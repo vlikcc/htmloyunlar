@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="tr">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+	<title>Kuvvet Vektörleri Toplama - Fizik</title>
+	<link rel="stylesheet" href="/assets/base.css" />
+	<meta name="theme-color" content="#0f172a" />
+	<style>
+		.game { width: min(1024px, 100vw); height: min(700px, 100vh); display: grid; grid-template-rows: auto 1fr auto; gap: 12px; }
+		.header, .footer { display: flex; justify-content: space-between; align-items: center; }
+		.board { overflow: hidden; }
+		.badge { background:#1f2937; border:1px solid #374151; border-radius: 8px; padding: 6px 10px; }
+	</style>
+</head>
+<body>
+	<div class="fullscreen">
+		<main class="game panel">
+			<header class="header">
+				<div class="grid" style="grid-auto-flow: column; gap: 8px; align-items:center;">
+					<button class="button" data-action="start">Başla</button>
+					<button class="button secondary" data-action="reset">Sıfırla</button>
+				</div>
+				<div class="grid" style="grid-auto-flow: column; gap: 8px; align-items:center;">
+					<span class="badge">Skor: <strong id="score">0</strong></span>
+					<span class="badge">Süre: <strong id="time">--</strong></span>
+					<button class="button warning" data-action="toggle-audio">Ses</button>
+				</div>
+			</header>
+			<section class="board" id="board">
+				<div class="container"><h2>Kuvvet Vektörleri Toplama</h2><p>Hızlı soru: Doğru seçeneği işaretle.</p><div class="grid grid-3"><button class="button" onclick="correct()">Doğru</button><button class="button secondary" onclick="wrong()">Yanlış 1</button><button class="button secondary" onclick="wrong()">Yanlış 2</button></div></div>
+			</section>
+			<footer class="footer">
+				<span>Fizik</span>
+				<a class="button secondary" href="/index.html">Ana Menü</a>
+			</footer>
+		</main>
+	</div>
+
+	<audio id="s-correct" src="data:audio/mp3;base64,"></audio>
+	<audio id="s-wrong" src="data:audio/mp3;base64,"></audio>
+
+	<script type="module">
+		import { GameEngine, Timer, AudioFx, $, $all } from '/assets/engine.js';
+		const scoreEl = document.getElementById('score');
+		const timeEl = document.getElementById('time');
+		GameEngine.init({
+			onStart() { startLevel(); },
+			onReset() { resetLevel(); }
+		});
+		window.addEventListener('score:change', (e) => { scoreEl.textContent = String(e.detail); });
+		function startLevel() {
+			GameEngine.resetScore();
+			Timer.start(60, (s) => timeEl.textContent = String(s), () => endLevel());
+			setup();
+		}
+		function resetLevel() {
+			Timer.stop();
+			timeEl.textContent = '--';
+			setup(true);
+		}
+		function endLevel() {
+			alert(`Süre bitti! Skor: ${GameEngine.state.score}`);
+		}
+		function setup(isReset = false) {
+			document.getElementById("board").innerHTML = `<div class="container"><h2>Kuvvet Vektörleri Toplama</h2><p>Hızlı soru: Doğru seçeneği işaretle.</p><div class="grid grid-3"><button class="button" onclick="correct()">Doğru</button><button class="button secondary" onclick="wrong()">Yanlış 1</button><button class="button secondary" onclick="wrong()">Yanlış 2</button></div></div>`;
+		}
+		function correct(points = 10) { GameEngine.addScore(points); AudioFx.play('s-correct'); }
+		function wrong() { AudioFx.play('s-wrong'); }
+	</script>
+</body>
+</html>
